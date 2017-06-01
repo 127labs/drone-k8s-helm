@@ -25,7 +25,7 @@ impl Config {
     }
 
     fn load_values(&mut self) {
-        let mut values = env.vars.filter_map(|var| )
+        // let mut values = env.vars.filter_map(|var| )
     }
 }
 

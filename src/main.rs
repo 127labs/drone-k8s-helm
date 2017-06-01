@@ -6,12 +6,15 @@ struct Config {
 
 struct Value {
     key: String,
-    value: String
+    value: String,
 }
 
 impl Value {
     fn new(key: &str, value: &str) -> Value {
-        Value { key: key.to_string(), value: value.to_string() }
+        Value {
+            key: key.to_string(),
+            value: value.to_string(),
+        }
     }
 }
 
@@ -25,16 +28,17 @@ impl Config {
     }
 
     fn load_values(&mut self) {
-        // let mut values = env.vars.filter_map(|var| )
+        self.values = env::vars()
+            .filter(|&(ref key, _)| key.starts_with("PLUGIN_SET"))
+            .map(|(key, val)| Value::new(&key, &val))
+            .collect();
     }
 }
 
 fn main() {
     let mut config = Config::new();
 
-    let value = Value::new("HOST", "ilinked.asia");
-
-    config.put_value(value);
+    config.load_values();
 
     for value in config.values {
         println!("{}={}", value.key, value.value);

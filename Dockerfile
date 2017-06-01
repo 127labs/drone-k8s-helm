@@ -1,5 +1,5 @@
 FROM scratch
 
-ADD ./target/release/yakp /bin/
+ADD ./target/release/yakp /
 
-ENTRYPOINT ["/bin/yakp"]
+CMD ["/yakp"]

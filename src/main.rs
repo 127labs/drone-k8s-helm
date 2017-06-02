@@ -1,3 +1,5 @@
+extern crate regex;
+
 mod config;
 
 use config::Config;

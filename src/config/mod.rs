@@ -1,5 +1,5 @@
 use std::env;
-// use regex::Regex;
+use regex::Regex;
 
 const VALUE_PREFIX: &'static str = "PLUGIN_SET_";
 
@@ -17,24 +17,28 @@ impl Config {
     // }
 
     pub fn load_values(&mut self) {
-        // let re = Regex::new(r"^(\w+)=(.+)$").unwrap();
+        let re = Regex::new(r"^(\w+)=(.+)$").unwrap();
 
-        // let default_values = match env::var("PLUGIN_VALUES") {
-        //     Ok(vals) => vals.split(",")
-        //                     .map(|key_value_pair| {
-        //                         let captures = re.captures(key_value_pair).unwrap();
-        //                         Value::new(captures.get(1).unwrap().as_str(), captures.get(2).unwrap().as_str())
-        //                     })
-        //                     .collect(),
-        //     _ => Vec::new(),
-        // };
+        let mut default_values = match env::var("PLUGIN_VALUES") {
+            Ok(vals) => {
+                vals.split(",")
+                    .map(|key_value_pair| {
+                        let captures = re.captures(key_value_pair).unwrap();
+                        Value::new(captures.get(1).unwrap().as_str(),
+                                   captures.get(2).unwrap().as_str())
+                    })
+                    .collect()
+            }
+            _ => Vec::new(),
+        };
 
 
         self.values = env::vars()
             .filter(|&(ref key, _)| key.starts_with(VALUE_PREFIX))
             .map(|(key, val)| Value::new(&key[VALUE_PREFIX.len()..], &val))
-            .collect()
-            // .extend(default_values.iter());
+            .collect();
+
+        self.values.append(&mut default_values)
     }
 }
 

@@ -9,7 +9,7 @@ fn main() {
 
     config.load_values();
 
-    for value in config.values {
-        println!("{}={}", value.key, value.value);
+    for (key, value) in config.values {
+        println!("{}={}", key, value);
     }
 }

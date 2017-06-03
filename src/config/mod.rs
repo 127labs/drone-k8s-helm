@@ -1,6 +1,8 @@
-use std::env;
-use regex::Regex;
 use std::collections::HashMap;
+use std::env;
+
+use regex::Regex;
+use tera::{Tera, Context};
 
 const VALUE_PREFIX: &'static str = "PLUGIN_SET_";
 
@@ -8,6 +10,7 @@ const VALUE_PREFIX: &'static str = "PLUGIN_SET_";
 pub struct Config {
     pub chart: Option<String>,
     pub master: Option<String>,
+    pub namespace: Option<String>,
     pub release: Option<String>,
     pub tls: Option<String>,
     pub token: Option<String>,
@@ -19,6 +22,7 @@ impl Config {
         Config {
             chart: None,
             master: None,
+            namespace: None,
             release: None,
             tls: None,
             token: None,
@@ -32,9 +36,36 @@ impl Config {
         self.load_plugin_values();
     }
 
+    pub fn build_command(&self) -> String {
+        let mut command = String::new();
+
+        command.push_str(format!("helm upgrade -i {} ", self.release.as_ref().unwrap()).as_str());
+
+        for (key, value) in &self.values {
+            command.push_str(format!("-set {}={} ", key, value).as_str());
+        }
+
+        command
+    }
+
+    pub fn build_kubeconfig(&self) -> String {
+        let tera = compile_templates!("templates/**/*");
+
+        let mut context = Context::new();
+        context.add("chart", &self.chart);
+        context.add("master", &self.master);
+        context.add("namespace", &self.namespace);
+        context.add("release", &self.release);
+        context.add("tls", &self.tls);
+        context.add("token", &self.token);
+
+        tera.render("kubeconfig", &context).unwrap()
+    }
+
     fn load(&mut self) -> () {
         self.chart = Some(env::var("PLUGIN_CHART").unwrap());
         self.master = Some(env::var("PLUGIN_MASTER").unwrap());
+        self.namespace = Some(env::var("PLUGIN_NAMESPACE").unwrap());
         self.release = Some(env::var("PLUGIN_RELEASE").unwrap());
         self.tls = Some(env::var("PLUGIN_TLS").unwrap());
         self.token = Some(env::var("PLUGIN_TOKEN").unwrap());

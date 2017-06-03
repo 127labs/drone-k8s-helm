@@ -1,4 +1,6 @@
 extern crate regex;
+#[macro_use(compile_templates)]
+extern crate tera;
 
 mod config;
 
@@ -8,6 +10,4 @@ fn main() {
     let mut config = Config::new();
 
     config.initialize();
-
-    println!("{:?}", config);
 }

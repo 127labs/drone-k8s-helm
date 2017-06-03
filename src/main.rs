@@ -7,9 +7,7 @@ use config::Config;
 fn main() {
     let mut config = Config::new();
 
-    config.load_values();
+    config.initialize();
 
-    for (key, value) in config.values {
-        println!("{}={}", key, value);
-    }
+    println!("{:?}", config);
 }

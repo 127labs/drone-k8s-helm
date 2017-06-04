@@ -3,12 +3,13 @@ extern crate regex;
 extern crate tera;
 
 mod config;
+mod plugin;
 
 use config::Config;
 
 fn main() {
-    let mut config = Config::new();
+    let config = Config::new();
 
-    config.initialize();
-    println!("{:?}", config.command_upgrade().unwrap());
+    plugin::write_config(&config);
+    plugin::upgrade(&config);
 }

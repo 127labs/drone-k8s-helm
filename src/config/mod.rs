@@ -1,20 +1,9 @@
 use std::collections::HashMap;
 use std::env;
-use std::fs;
-use std::fs::File;
-use std::io::Write;
-use std::io::Error;
-use std::process::Output;
-use std::process::Command;
-use std::path::Path;
 
 use regex::Regex;
-use tera::Context;
 
 const VALUE_PREFIX: &'static str = "PLUGIN_SET_";
-const HELM_BIN: &'static str = "/bin/helm";
-const CONFIG_DIR: &'static str = "./root/.kube";
-const CONFIG: &'static str = "config";
 
 #[derive(Debug)]
 pub struct Config {
@@ -28,7 +17,7 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn new() -> Config {
+    pub fn default() -> Config {
         Config {
             chart: None,
             master: None,
@@ -40,60 +29,23 @@ impl Config {
         }
     }
 
-    pub fn initialize(&mut self) -> () {
-        self.load();
-        self.load_plugin_set();
-        self.load_plugin_values();
-        self.build_kube_config();
-    }
+    pub fn new() -> Config {
+        let mut config = Config::default();
 
-    pub fn command_upgrade(&self) -> Result<Output, Error> {
-        let mut command = String::new();
+        config.load();
+        config.load_plugin_set();
+        config.load_plugin_values();
 
-        command.push_str(format!("{} upgrade -i {} ", HELM_BIN, self.release.as_ref().unwrap()).as_str());
-
-        for (key, value) in &self.values {
-            command.push_str(format!("--set {}={} ", key, value).as_str());
-        }
-
-        command.push_str(format!("{}", self.chart.as_ref().unwrap()).as_str());
-
-        println!("{}", command);
-
-        Command::new("sh")
-            .arg("-c")
-            .arg(command.as_str())
-            .output()
-    }
-
-    pub fn build_kube_config(&self) -> () {
-        let tera = compile_templates!("templates/**/*");
-
-        let mut context = Context::new();
-
-        context.add("chart", &self.chart);
-        context.add("master", &self.master);
-        context.add("namespace", &self.namespace);
-        context.add("release", &self.release);
-        context.add("skip_tls", &self.skip_tls);
-        context.add("token", &self.token);
-
-        let config = tera.render("kube_config", &context).unwrap();
-
-        fs::create_dir_all(CONFIG_DIR);
-
-        let mut buffer = File::create(Path::new(CONFIG_DIR).join(CONFIG)).unwrap();
-
-        buffer.write(&config.into_bytes());
+        config
     }
 
     fn load(&mut self) -> () {
-        self.chart = Some(env::var("PLUGIN_CHART").unwrap());
-        self.master = Some(env::var("PLUGIN_MASTER").unwrap());
-        self.namespace = Some(env::var("PLUGIN_NAMESPACE").unwrap());
-        self.release = Some(env::var("PLUGIN_RELEASE").unwrap());
-        self.skip_tls = Some(env::var("PLUGIN_SKIP_TLS").unwrap());
-        self.token = Some(env::var("PLUGIN_TOKEN").unwrap());
+        self.chart = Some(env::var("PLUGIN_CHART").expect("PLUGIN_CHART env must be set"));
+        self.master = Some(env::var("PLUGIN_MASTER").expect("PLUGIN_MASTER env must be set"));
+        self.namespace = Some(env::var("PLUGIN_NAMESPACE").unwrap_or("default".to_string()));
+        self.release = Some(env::var("PLUGIN_RELEASE").expect("PLUGIN_RELEASE env must be set"));
+        self.skip_tls = Some(env::var("PLUGIN_SKIP_TLS").expect("PLUGIN_SKIP_TLS env must be set"));
+        self.token = Some(env::var("PLUGIN_TOKEN").expect("PLUGIN_TOKEN env must be set"));
     }
 
     fn load_plugin_set(&mut self) -> () {
@@ -104,13 +56,18 @@ impl Config {
 
     fn load_plugin_values(&mut self) -> () {
         let re = Regex::new(r"^(\w+)=(.+)$").unwrap();
-        let values = env::var("PLUGIN_VALUES").unwrap();
+        let values = env::var("PLUGIN_VALUES").unwrap_or(String::new());
 
-        for key_value_pair in values.split(",") {
-            let captures = re.captures(key_value_pair).unwrap();
-            let key = captures.get(1).unwrap().as_str().to_string();
-            let value = captures.get(2).unwrap().as_str().to_string();
-            self.values.insert(key, value);
+        for key_val in values.split(",") {
+            match key_val {
+                "" => break,
+                kv => {
+                    let captures = re.captures(kv).unwrap();
+                    let key = captures.get(1).unwrap().as_str().to_string();
+                    let value = captures.get(2).unwrap().as_str().to_string();
+                    self.values.insert(key, value);
+                }
+            }
         }
     }
 }

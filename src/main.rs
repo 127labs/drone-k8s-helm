@@ -10,5 +10,6 @@ fn main() -> () {
     let config = Config::new();
 
     plugin::write_config(&config);
+    plugin::init();
     plugin::upgrade(&config);
 }

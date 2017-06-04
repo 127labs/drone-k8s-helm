@@ -90,3 +90,12 @@ pub fn upgrade(config: &Config) -> () {
 
     command.status().expect("Failed to execute helm upgrade command");
 }
+
+pub fn init() -> () {
+    let helm_bin = which("helm").unwrap();
+
+    Command::new(helm_bin.to_str().unwrap())
+        .arg("init")
+        .status()
+        .expect("Failed to initialize helm");
+}

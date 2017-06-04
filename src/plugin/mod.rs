@@ -16,10 +16,8 @@ pub fn write_config(config: &Config) {
 
     let mut context = Context::new();
 
-    context.add("chart", &config.chart);
     context.add("master", &config.master);
     context.add("namespace", &config.namespace);
-    context.add("release", &config.release);
     context.add("skip_tls", &config.skip_tls);
     context.add("token", &config.token);
 

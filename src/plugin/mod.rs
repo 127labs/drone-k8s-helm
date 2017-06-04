@@ -27,7 +27,7 @@ pub fn write_config(config: &Config) {
 
     fs::create_dir_all(CONFIG_DIR).expect("Failed to create config directory");
 
-    let mut buffer = File::create(Path::new(CONFIG_DIR).join(CONFIG)).unwrap();
+    let mut buffer = File::create(Path::new(CONFIG_DIR).join(CONFIG)).expect("Failed to create config file");
 
     buffer.write(&kube_config.into_bytes()).expect("Failed to write config");
 }

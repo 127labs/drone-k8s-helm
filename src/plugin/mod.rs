@@ -12,7 +12,7 @@ const CONFIG_DIR: &'static str = "/root/.kube";
 const CONFIG: &'static str = "config";
 
 pub fn write_config(config: &Config) -> () {
-    let tera = compile_templates!("templates/**/*");
+    let tera = compile_templates!("/**/*");
 
     let mut context = Context::new();
 

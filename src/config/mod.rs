@@ -44,7 +44,7 @@ impl Config {
         self.master = Some(env::var("PLUGIN_MASTER").expect("PLUGIN_MASTER env must be set"));
         self.namespace = Some(env::var("PLUGIN_NAMESPACE").unwrap_or("default".to_string()));
         self.release = Some(env::var("PLUGIN_RELEASE").expect("PLUGIN_RELEASE env must be set"));
-        self.skip_tls = Some(env::var("PLUGIN_SKIP_TLS").expect("PLUGIN_SKIP_TLS env must be set"));
+        self.skip_tls = Some(env::var("PLUGIN_SKIP_TLS").unwrap_or("false".to_string()));
         self.token = Some(env::var("PLUGIN_TOKEN").expect("PLUGIN_TOKEN env must be set"));
     }
 

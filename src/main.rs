@@ -7,7 +7,7 @@ mod plugin;
 
 use config::Config;
 
-fn main() {
+fn main() -> () {
     let config = Config::new();
 
     plugin::write_config(&config);

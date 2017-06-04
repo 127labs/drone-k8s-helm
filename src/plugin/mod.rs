@@ -11,7 +11,7 @@ const HELM_BIN: &'static str = "/usr/local/bin/helm";
 const CONFIG_DIR: &'static str = "/Users/imranismail/.kube";
 const CONFIG: &'static str = "config";
 
-pub fn write_config(config: &Config) {
+pub fn write_config(config: &Config) -> () {
     let tera = compile_templates!("templates/**/*");
 
     let mut context = Context::new();
@@ -30,7 +30,7 @@ pub fn write_config(config: &Config) {
     buffer.write(&kube_config.into_bytes()).expect("Failed to write config");
 }
 
-pub fn upgrade(config: &Config) {
+pub fn upgrade(config: &Config) -> () {
     let mut command = String::new();
 
     command.push_str(format!("{} upgrade -i {} ", HELM_BIN, config.release.as_ref().unwrap()).as_str());

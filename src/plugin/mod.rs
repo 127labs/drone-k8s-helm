@@ -22,7 +22,7 @@ contexts:
     namespace: {{ namespace }}
     user: helm
   name: helm
-current-context: \"helm\"
+current-context: helm
 kind: Config
 preferences: {}
 users:

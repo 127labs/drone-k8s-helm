@@ -5,4 +5,4 @@ authors = ["Imran Ismail <imran@127labs.com>", "Faris Amali Alis <faris@127labs.
 
 [dependencies]
 regex = "0.2"
-tera = "0.10.6"
+handlebars = "0.27.0"

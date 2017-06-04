@@ -1,6 +1,5 @@
 extern crate regex;
-#[macro_use(compile_templates)]
-extern crate tera;
+extern crate handlebars;
 
 mod config;
 mod plugin;

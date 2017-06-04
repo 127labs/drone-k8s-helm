@@ -17,3 +17,5 @@ ADD ./target/x86_64-unknown-linux-musl/release/yakp /var/yakp/yakp
 ADD ./templates                                     /var/yakp/templates
 
 RUN ln -s /var/yakp/yakp /bin/yakp
+
+ENTRYPOINT ["/bin/yakp"]

@@ -17,7 +17,7 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn default() -> Config {
+    fn default() -> Config {
         Config {
             chart: None,
             master: None,

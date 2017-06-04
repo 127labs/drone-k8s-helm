@@ -13,5 +13,7 @@ RUN tar -zxvf /tmp/${FILENAME} -C /tmp \
   && mv /tmp/kubectl /bin/kubectl \
   && rm -rf /tmp
 
-ADD ./target/x86_64-unknown-linux-musl/release/yakp /bin/yakp
+ADD ./target/x86_64-unknown-linux-musl/release/yakp /var/yakp/yakp
+ADD ./templates                                     /var/yakp/templates
 
+RUN ln -s /var/yakp/yakp /bin/yakp

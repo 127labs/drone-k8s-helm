@@ -10,4 +10,5 @@ fn main() {
     let mut config = Config::new();
 
     config.initialize();
+    println!("{:?}", config.command_upgrade().unwrap());
 }

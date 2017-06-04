@@ -1,10 +1,20 @@
 use std::collections::HashMap;
 use std::env;
+use std::fs;
+use std::fs::File;
+use std::io::Write;
+use std::io::Error;
+use std::process::Output;
+use std::process::Command;
+use std::path::Path;
 
 use regex::Regex;
-use tera::{Tera, Context};
+use tera::Context;
 
 const VALUE_PREFIX: &'static str = "PLUGIN_SET_";
+const HELM_BIN: &'static str = "/bin/helm";
+const CONFIG_DIR: &'static str = "./root/.kube";
+const CONFIG: &'static str = "config";
 
 #[derive(Debug)]
 pub struct Config {
@@ -12,7 +22,7 @@ pub struct Config {
     pub master: Option<String>,
     pub namespace: Option<String>,
     pub release: Option<String>,
-    pub tls: Option<String>,
+    pub skip_tls: Option<String>,
     pub token: Option<String>,
     pub values: HashMap<String, String>,
 }
@@ -24,7 +34,7 @@ impl Config {
             master: None,
             namespace: None,
             release: None,
-            tls: None,
+            skip_tls: None,
             token: None,
             values: HashMap::new(),
         }
@@ -34,32 +44,47 @@ impl Config {
         self.load();
         self.load_plugin_set();
         self.load_plugin_values();
+        self.build_kube_config();
     }
 
-    pub fn build_command(&self) -> String {
+    pub fn command_upgrade(&self) -> Result<Output, Error> {
         let mut command = String::new();
 
-        command.push_str(format!("helm upgrade -i {} ", self.release.as_ref().unwrap()).as_str());
+        command.push_str(format!("{} upgrade -i {} ", HELM_BIN, self.release.as_ref().unwrap()).as_str());
 
         for (key, value) in &self.values {
-            command.push_str(format!("-set {}={} ", key, value).as_str());
+            command.push_str(format!("--set {}={} ", key, value).as_str());
         }
 
-        command
+        command.push_str(format!("{}", self.chart.as_ref().unwrap()).as_str());
+
+        println!("{}", command);
+
+        Command::new("sh")
+            .arg("-c")
+            .arg(command.as_str())
+            .output()
     }
 
-    pub fn build_kubeconfig(&self) -> String {
+    pub fn build_kube_config(&self) -> () {
         let tera = compile_templates!("templates/**/*");
 
         let mut context = Context::new();
+
         context.add("chart", &self.chart);
         context.add("master", &self.master);
         context.add("namespace", &self.namespace);
         context.add("release", &self.release);
-        context.add("tls", &self.tls);
+        context.add("skip_tls", &self.skip_tls);
         context.add("token", &self.token);
 
-        tera.render("kubeconfig", &context).unwrap()
+        let config = tera.render("kube_config", &context).unwrap();
+
+        fs::create_dir_all(CONFIG_DIR);
+
+        let mut buffer = File::create(Path::new(CONFIG_DIR).join(CONFIG)).unwrap();
+
+        buffer.write(&config.into_bytes());
     }
 
     fn load(&mut self) -> () {
@@ -67,7 +92,7 @@ impl Config {
         self.master = Some(env::var("PLUGIN_MASTER").unwrap());
         self.namespace = Some(env::var("PLUGIN_NAMESPACE").unwrap());
         self.release = Some(env::var("PLUGIN_RELEASE").unwrap());
-        self.tls = Some(env::var("PLUGIN_TLS").unwrap());
+        self.skip_tls = Some(env::var("PLUGIN_SKIP_TLS").unwrap());
         self.token = Some(env::var("PLUGIN_TOKEN").unwrap());
     }
 

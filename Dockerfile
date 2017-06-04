@@ -1,5 +1,17 @@
-FROM scratch
+FROM alpine:latest
 
-ADD ./target/x86_64-unknown-linux-musl/release/yakp /
+ENV VERSION v2.4.2
+ENV FILENAME helm-${VERSION}-linux-amd64.tar.gz
+ENV KUBECTL v1.6.4
 
-CMD ["/yakp"]
+ADD http://storage.googleapis.com/kubernetes-helm/${FILENAME} /tmp
+ADD https://storage.googleapis.com/kubernetes-release/release/${KUBECTL}/bin/linux/amd64/kubectl /tmp
+
+RUN tar -zxvf /tmp/${FILENAME} -C /tmp \
+  && mv /tmp/linux-amd64/helm /bin/helm \
+  && chmod +x /tmp/kubectl \
+  && mv /tmp/kubectl /bin/kubectl \
+  && rm -rf /tmp
+
+ADD ./target/x86_64-unknown-linux-musl/release/yakp /bin/yakp
+

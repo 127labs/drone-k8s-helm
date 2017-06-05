@@ -9,8 +9,8 @@ pipeline:
   publish:
     image: plugins/docker
     repo: 127labs/yakp
-    username: imranismail
-    password: ${PASSWORD}
+    username: ${DOCKER_USERNAME}
+    password: ${DOCKER_PASSWORD}
     email: imran@127labs.com
     tags:
       - latest

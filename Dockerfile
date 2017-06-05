@@ -4,7 +4,10 @@ ENV VERSION v2.4.2
 ENV FILENAME helm-${VERSION}-linux-amd64.tar.gz
 ENV KUBECTL v1.6.4
 
+RUN apk -Uuv add curl bash && rm /var/cache/apk/*
+
 ADD http://storage.googleapis.com/kubernetes-helm/${FILENAME} /tmp
+
 ADD https://storage.googleapis.com/kubernetes-release/release/${KUBECTL}/bin/linux/amd64/kubectl /tmp
 
 RUN tar -zxvf /tmp/${FILENAME} -C /tmp \
@@ -13,9 +16,6 @@ RUN tar -zxvf /tmp/${FILENAME} -C /tmp \
   && mv /tmp/kubectl /bin/kubectl \
   && rm -rf /tmp
 
-ADD ./target/x86_64-unknown-linux-musl/release/yakp /var/yakp/yakp
-ADD ./templates                                     /var/yakp/templates
-
-RUN ln -s /var/yakp/yakp /bin/yakp
+ADD ./target/x86_64-unknown-linux-musl/release/yakp /bin/yakp
 
 ENTRYPOINT ["/bin/yakp"]

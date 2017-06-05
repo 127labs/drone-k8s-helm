@@ -1,9 +1,35 @@
 use std::collections::HashMap;
 use std::env;
+use std::fs;
+use std::fs::File;
+use std::io::Write;
+use handlebars::Handlebars;
+use std::collections::BTreeMap;
 
 use regex::Regex;
 
 const VALUE_PREFIX: &'static str = "PLUGIN_SET_";
+const TEMPLATE: &'static str = "\
+apiVersion: v1
+clusters:
+- cluster:
+    insecure-skip-tls-verify: {{ skip_tls }}
+    server: {{ master }}
+  name: helm
+contexts:
+- context:
+    cluster: helm
+    namespace: {{ namespace }}
+    user: helm
+  name: helm
+current-context: helm
+kind: Config
+preferences: {}
+users:
+- name: helm
+  user:
+    token: {{ token }}\
+";
 
 #[derive(Debug)]
 pub struct Config {
@@ -14,9 +40,22 @@ pub struct Config {
     pub skip_tls: Option<String>,
     pub token: Option<String>,
     pub values: HashMap<String, String>,
+    pub file: Option<File>,
 }
 
 impl Config {
+    pub fn new() -> Config {
+        let mut config = Config::default();
+
+        config.load();
+        config.load_plugin_set();
+        config.load_plugin_values();
+        config.create_file();
+        config.write_file();
+
+        config
+    }
+
     fn default() -> Config {
         Config {
             chart: None,
@@ -25,18 +64,42 @@ impl Config {
             release: None,
             skip_tls: None,
             token: None,
+            file: None,
             values: HashMap::new(),
         }
     }
 
-    pub fn new() -> Config {
-        let mut config = Config::default();
+    fn write_file(& self) -> () {
+        let mut handlebars = Handlebars::new();
+        let mut assigns = BTreeMap::new();
 
-        config.load();
-        config.load_plugin_set();
-        config.load_plugin_values();
+        handlebars.register_template_string("config", TEMPLATE)
+            .expect("Failed to register template");
 
-        config
+        assigns.insert("master", &self.master);
+        assigns.insert("namespace", &self.namespace);
+        assigns.insert("skip_tls", &self.skip_tls);
+        assigns.insert("token", &self.token);
+
+        let rendered_config = handlebars.render("config", &assigns)
+            .expect("Failed to render kube config");
+
+        self.file.as_ref()
+            .expect("File is not set")
+            .write(&rendered_config.into_bytes())
+            .expect("Failed to write config");
+    }
+
+    fn create_file(&mut self) -> () {
+        let mut config_path = env::home_dir().expect("Failed to find home directory");
+
+        config_path.push(".kube");
+
+        fs::create_dir_all(config_path.as_path()).expect("Failed to create config directory");
+
+        config_path.push("config");
+
+        self.file = Some(File::create(config_path).expect("Failed to create config file"));
     }
 
     fn load(&mut self) -> () {

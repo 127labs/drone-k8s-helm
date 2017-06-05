@@ -2,7 +2,7 @@ branches: [master]
 pipeline:
   compile:
     image: ekidd/rust-musl-builder
-    command:
+    commands:
       - cargo
       - build
       - --release

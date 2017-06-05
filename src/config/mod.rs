@@ -39,8 +39,9 @@ pub struct Config {
     pub release: Option<String>,
     pub skip_tls: Option<String>,
     pub token: Option<String>,
-    pub values: HashMap<String, String>,
+    pub clean_before_release: Option<String>,
     pub file: Option<File>,
+    pub values: HashMap<String, String>,
 }
 
 impl Config {
@@ -64,16 +65,18 @@ impl Config {
             release: None,
             skip_tls: None,
             token: None,
+            clean_before_release: None,
             file: None,
             values: HashMap::new(),
         }
     }
 
-    fn write_file(& self) -> () {
+    fn write_file(&self) -> () {
         let mut handlebars = Handlebars::new();
         let mut assigns = BTreeMap::new();
 
-        handlebars.register_template_string("config", TEMPLATE)
+        handlebars
+            .register_template_string("config", TEMPLATE)
             .expect("Failed to register template");
 
         assigns.insert("master", &self.master);
@@ -81,10 +84,12 @@ impl Config {
         assigns.insert("skip_tls", &self.skip_tls);
         assigns.insert("token", &self.token);
 
-        let rendered_config = handlebars.render("config", &assigns)
+        let rendered_config = handlebars
+            .render("config", &assigns)
             .expect("Failed to render kube config");
 
-        self.file.as_ref()
+        self.file
+            .as_ref()
             .expect("File is not set")
             .write(&rendered_config.into_bytes())
             .expect("Failed to write config");
@@ -109,6 +114,8 @@ impl Config {
         self.release = Some(env::var("PLUGIN_RELEASE").expect("PLUGIN_RELEASE env must be set"));
         self.skip_tls = Some(env::var("PLUGIN_SKIP_TLS").unwrap_or("false".to_string()));
         self.token = Some(env::var("PLUGIN_TOKEN").expect("PLUGIN_TOKEN env must be set"));
+        self.clean_before_release = Some(env::var("PLUGIN_CLEAN_BEFORE_RELEASE")
+                                             .unwrap_or("false".to_string()));
     }
 
     fn load_plugin_set(&mut self) -> () {

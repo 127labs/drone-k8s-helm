@@ -10,5 +10,6 @@ fn main() -> () {
     let config = Config::new();
 
     plugin::init();
+    plugin::clean(&config);
     plugin::upgrade(&config);
 }

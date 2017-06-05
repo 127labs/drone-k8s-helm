@@ -3,7 +3,7 @@ pipeline:
   compile:
     image: ekidd/rust-musl-builder
     volumes:
-      - ./:/home/rust/src
+      - ${PWD}:/home/rust/src
     commands:
       - cargo
       - build

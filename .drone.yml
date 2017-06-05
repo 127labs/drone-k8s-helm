@@ -3,7 +3,7 @@ pipeline:
   compile:
     image: ekidd/rust-musl-builder
     volumes:
-      - ${DRONE_WORKSPACE}:/home/rust/src
+      - /drone/src/github.com/${DRONE_REPO}:/home/rust/src
     commands:
       - cargo
       - build

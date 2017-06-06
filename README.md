@@ -10,7 +10,7 @@ pipeline:
     release: wiki
     skip_tls: true
     values:
-      dokuwikiEmail: $${DOKUWIKI_EMAIL},
+      dokuwikiEmail: $${DOKUWIKI_EMAIL}
       dokuwikiPassword: $${DOKUWIKI_PASSWORD}
     secrets: [dokuwiki_email, dokuwiki_password]
 ```

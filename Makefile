@@ -5,3 +5,5 @@ build:
 docker.build:
 	@docker rmi 127labs/yakp:latest
 	@docker build -t 127labs/yakp:latest .
+docker.push:
+	@docker push 127labs/yakp:latest

@@ -19,14 +19,15 @@ pipeline:
 Which is equivalent to
 
 ```shell
-docker run 127labs/yakp \
-  -e PLUGIN_CHART=stable/dokuwiki \
-  -e PLUGIN_MASTER=https://127.0.0.1:8001 \
-  -e PLUGIN_TOKEN=super-long-token \
+docker run \
+  -e PLUGIN_CHART="stable/dokuwiki" \
+  -e PLUGIN_MASTER="https://127.0.0.1:8001" \
+  -e PLUGIN_TOKEN="super-long-token" \
   -e PLUGIN_RELEASE=wiki \
   -e PLUGIN_SKIP_TLS=true \
   -e PLUGIN_CLEAN_BEFORE_RELEASE=true \
   -e PLUGIN_VALUES='{"dokuwikiEmail":"${DOKUWIKI_EMAIL}","dokuwikiPassword":"${DOKUWIKI_PASSWORD}"}' \
   -e DOKUWIKI_EMAIL=imran@127labs.com \
-  -e DOKUWIKI_PASSWORD=password
+  -e DOKUWIKI_PASSWORD=password \
+  127labs/yakp
 ```

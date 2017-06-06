@@ -1,14 +1,15 @@
-use std::collections::HashMap;
+extern crate serde_json;
+
 use std::env;
 use std::fs;
 use std::fs::File;
 use std::io::Write;
-use handlebars::Handlebars;
-use std::collections::BTreeMap;
+use std::collections::HashMap;
 
+use handlebars::Handlebars;
+use serde_json::Value;
 use regex::Regex;
 
-const VALUE_PREFIX: &'static str = "PLUGIN_SET_";
 const TEMPLATE: &'static str = "\
 apiVersion: v1
 clusters:
@@ -33,15 +34,14 @@ users:
 
 #[derive(Debug)]
 pub struct Config {
-    pub chart: Option<String>,
-    pub master: Option<String>,
-    pub namespace: Option<String>,
-    pub release: Option<String>,
-    pub skip_tls: Option<String>,
-    pub token: Option<String>,
-    pub clean_before_release: Option<String>,
-    pub file: Option<File>,
-    pub values: HashMap<String, String>,
+    pub chart: Value,
+    pub master: Value,
+    pub namespace: Value,
+    pub release: Value,
+    pub skip_tls: Value,
+    pub token: Value,
+    pub clean_before_release: Value,
+    pub values: Value,
 }
 
 impl Config {
@@ -49,9 +49,7 @@ impl Config {
         let mut config = Config::default();
 
         config.load();
-        config.load_plugin_set();
-        config.load_plugin_values();
-        config.create_file();
+        config.parse_values();
         config.write_file();
 
         config
@@ -59,21 +57,82 @@ impl Config {
 
     fn default() -> Config {
         Config {
-            chart: None,
-            master: None,
-            namespace: None,
-            release: None,
-            skip_tls: None,
-            token: None,
-            clean_before_release: None,
-            file: None,
-            values: HashMap::new(),
+            chart: Value::Null,
+            master: Value::Null,
+            namespace: Value::Null,
+            release: Value::Null,
+            skip_tls: Value::Null,
+            token: Value::Null,
+            clean_before_release: Value::Null,
+            values: Value::Null,
         }
+    }
+
+    fn load(&mut self) -> () {
+        self.chart = env::var("PLUGIN_CHART")
+            .and_then(|chart| Ok(Value::String(chart)))
+            .expect("PLUGIN_CHART env must be set");
+        self.master = env::var("PLUGIN_MASTER")
+            .and_then(|master| Ok(Value::String(master)))
+            .expect("PLUGIN_MASTER env must be set");
+        self.namespace = env::var("PLUGIN_NAMESPACE")
+            .and_then(|namespace| Ok(Value::String(namespace)))
+            .unwrap_or(Value::String("default".to_string()));
+        self.release = env::var("PLUGIN_RELEASE")
+            .and_then(|release| Ok(Value::String(release)))
+            .expect("PLUGIN_RELEASE env must be set");
+        self.skip_tls = env::var("PLUGIN_SKIP_TLS")
+            .and_then(|skip_tls| {
+                          Ok(Value::Bool(skip_tls.parse().expect("PLUGIN_SKIP_TLS must be bool")))
+                      })
+            .unwrap_or(Value::Bool(false));
+        self.token = env::var("PLUGIN_TOKEN")
+            .and_then(|token| Ok(Value::String(token)))
+            .expect("PLUGIN_TOKEN env must be set");
+        self.clean_before_release = env::var("PLUGIN_CLEAN_BEFORE_RELEASE")
+            .and_then(|clean_before_release| {
+                          Ok(Value::Bool(clean_before_release
+                                             .parse()
+                                             .expect("PLUGIN_CLEAN_BEFORE_RELEASE must be bool",)))
+                      })
+            .unwrap_or(Value::Bool(false));
+    }
+
+    fn parse_values(&mut self) -> () {
+        let regex = Regex::new(r"^\$\{(\w+)\}$").unwrap();
+        let data: String = env::var("PLUGIN_VALUES").unwrap_or("{}".to_string());
+
+        self.values = serde_json::from_str::<Value>(&data).expect("Failed to parse values");
+
+        for (_, value) in self.values
+                .as_object_mut()
+                .expect("Values must be an object") {
+            let value_string = value.as_str().unwrap().to_string();
+
+            if regex.is_match(&value_string) {
+                let captures = regex.captures(&value_string).unwrap();
+                let match_str = captures.get(1).unwrap().as_str();
+                let var = env::var(match_str).expect(format!("{} is not set", match_str).as_str());
+                *value = Value::String(var.to_string());
+            }
+        }
+    }
+
+    fn create_file(&self) -> File {
+        let mut config_path = env::home_dir().expect("Failed to find home directory");
+
+        config_path.push(".kube");
+
+        fs::create_dir_all(config_path.as_path()).expect("Failed to create config directory");
+
+        config_path.push("config");
+
+        File::create(config_path).expect("Failed to create config file")
     }
 
     fn write_file(&self) -> () {
         let mut handlebars = Handlebars::new();
-        let mut assigns = BTreeMap::new();
+        let mut assigns = HashMap::new();
 
         handlebars
             .register_template_string("config", TEMPLATE)
@@ -88,56 +147,8 @@ impl Config {
             .render("config", &assigns)
             .expect("Failed to render kube config");
 
-        self.file
-            .as_ref()
-            .expect("File is not set")
+        self.create_file()
             .write(&rendered_config.into_bytes())
             .expect("Failed to write config");
-    }
-
-    fn create_file(&mut self) -> () {
-        let mut config_path = env::home_dir().expect("Failed to find home directory");
-
-        config_path.push(".kube");
-
-        fs::create_dir_all(config_path.as_path()).expect("Failed to create config directory");
-
-        config_path.push("config");
-
-        self.file = Some(File::create(config_path).expect("Failed to create config file"));
-    }
-
-    fn load(&mut self) -> () {
-        self.chart = Some(env::var("PLUGIN_CHART").expect("PLUGIN_CHART env must be set"));
-        self.master = Some(env::var("PLUGIN_MASTER").expect("PLUGIN_MASTER env must be set"));
-        self.namespace = Some(env::var("PLUGIN_NAMESPACE").unwrap_or("default".to_string()));
-        self.release = Some(env::var("PLUGIN_RELEASE").expect("PLUGIN_RELEASE env must be set"));
-        self.skip_tls = Some(env::var("PLUGIN_SKIP_TLS").unwrap_or("false".to_string()));
-        self.token = Some(env::var("PLUGIN_TOKEN").expect("PLUGIN_TOKEN env must be set"));
-        self.clean_before_release = Some(env::var("PLUGIN_CLEAN_BEFORE_RELEASE")
-                                             .unwrap_or("false".to_string()));
-    }
-
-    fn load_plugin_set(&mut self) -> () {
-        for (key, val) in env::vars().filter(|&(ref key, _)| key.starts_with(VALUE_PREFIX)) {
-            self.values.insert(key.replace(VALUE_PREFIX, ""), val);
-        }
-    }
-
-    fn load_plugin_values(&mut self) -> () {
-        let re = Regex::new(r"^(\w+)=(.+)$").unwrap();
-        let values = env::var("PLUGIN_VALUES").unwrap_or(String::new());
-
-        for key_val in values.split(",") {
-            match key_val {
-                "" => break,
-                kv => {
-                    let captures = re.captures(kv).unwrap();
-                    let key = captures.get(1).unwrap().as_str().to_string();
-                    let value = captures.get(2).unwrap().as_str().to_string();
-                    self.values.insert(key, value);
-                }
-            }
-        }
     }
 }

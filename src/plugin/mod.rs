@@ -26,15 +26,15 @@ pub fn upgrade(config: &Config) -> () {
     command
         .arg("upgrade")
         .arg("-i")
-        .arg(config.release.as_ref().unwrap());
+        .arg(config.release.as_str().unwrap());
 
-    for (key, value) in &config.values {
+    for (key, value) in config.values.as_object().unwrap() {
         command
             .arg("--set")
-            .arg(format!("{}={}", key, value).as_str());
+            .arg(format!("{}={}", key, value.as_str().unwrap()).as_str());
     }
 
-    command.arg(config.chart.as_ref().unwrap());
+    command.arg(config.chart.as_str().unwrap());
 
     command
         .status()
@@ -43,16 +43,16 @@ pub fn upgrade(config: &Config) -> () {
 
 pub fn clean(config: &Config) -> () {
     let kubectl_bin = which("kubectl").unwrap();
-    let clean_before_release = config.clean_before_release.as_ref().unwrap();
+    let clean_before_release = config.clean_before_release.as_bool().unwrap();
 
-    if clean_before_release == "true" {
+    if clean_before_release == true {
         let mut command = Command::new(kubectl_bin.to_str().unwrap());
 
         command
             .arg("delete")
             .arg("jobs")
             .arg("-l")
-            .arg(format!("release={}", config.release.as_ref().unwrap()))
+            .arg(format!("release={}", config.release.as_str().unwrap()))
             .status()
             .expect("Failed to delete jobs from master");
     }

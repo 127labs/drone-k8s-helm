@@ -1,5 +1,6 @@
 extern crate regex;
 extern crate handlebars;
+extern crate serde_json;
 
 mod config;
 mod plugin;

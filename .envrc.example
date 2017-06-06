@@ -1,9 +1,10 @@
-# export PLUGIN_NAMESPACE=default
-# export PLUGIN_SET_*=VAL
-# export PLUGIN_VALUES=KEY=VAL
+export PLUGIN_NAMESPACE=default
 export PLUGIN_MASTER=https://127.0.0.1:8001
 export PLUGIN_CHART=stable/ghost
 export PLUGIN_SKIP_TLS=true
 export PLUGIN_TOKEN=some-secure-token-string
 export PLUGIN_RELEASE=blog
 export PLUGIN_CLEAN_BEFORE_RELEASE=true
+export PLUGIN_VALUES='{"dokuwikiEmail":"${DOKUWIKI_EMAIL}","dokuwikiPassword":"${DOKUWIKI_PASSWORD}"}'
+export DOKUWIKI_EMAIL=imran@127labs.com
+export DOKUWIKI_PASSWORD=password

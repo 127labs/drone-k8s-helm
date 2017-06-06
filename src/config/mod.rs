@@ -1,6 +1,7 @@
 extern crate serde_json;
 
-#[cfg(test)] pub mod tests;
+#[cfg(test)]
+pub mod tests;
 
 use std::env;
 use std::fs;

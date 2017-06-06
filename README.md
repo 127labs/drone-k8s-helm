@@ -9,6 +9,7 @@ pipeline:
     token: super-long-token
     release: wiki
     skip_tls: true
+    clean_before_release: true
     values:
       dokuwikiEmail: $${DOKUWIKI_EMAIL}
       dokuwikiPassword: $${DOKUWIKI_PASSWORD}
@@ -24,6 +25,7 @@ docker run 127labs/yakp \
   -e PLUGIN_TOKEN=super-long-token \
   -e PLUGIN_RELEASE=wiki \
   -e PLUGIN_SKIP_TLS=true \
+  -e PLUGIN_CLEAN_BEFORE_RELEASE=true \
   -e PLUGIN_VALUES='{"dokuwikiEmail":"${DOKUWIKI_EMAIL}","dokuwikiPassword":"${DOKUWIKI_PASSWORD}"}' \
   -e DOKUWIKI_EMAIL=imran@127labs.com \
   -e DOKUWIKI_PASSWORD=password

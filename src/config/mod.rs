@@ -4,7 +4,7 @@ use std::env;
 use std::fs;
 use std::fs::File;
 use std::io::Write;
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 
 use handlebars::Handlebars;
 use serde_json::Value;
@@ -132,7 +132,7 @@ impl Config {
 
     fn write_file(&self) -> () {
         let mut handlebars = Handlebars::new();
-        let mut assigns = HashMap::new();
+        let mut assigns = BTreeMap::new();
 
         handlebars
             .register_template_string("config", TEMPLATE)

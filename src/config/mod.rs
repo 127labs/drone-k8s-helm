@@ -1,5 +1,7 @@
 extern crate serde_json;
 
+#[cfg(test)] pub mod tests;
+
 use std::env;
 use std::fs;
 use std::fs::File;
@@ -55,7 +57,7 @@ impl Config {
         config
     }
 
-    fn default() -> Config {
+    pub fn default() -> Config {
         Config {
             chart: Value::Null,
             master: Value::Null,
@@ -68,7 +70,7 @@ impl Config {
         }
     }
 
-    fn load(&mut self) -> () {
+    pub fn load(&mut self) -> () {
         self.chart = env::var("PLUGIN_CHART")
             .and_then(|chart| Ok(Value::String(chart)))
             .expect("PLUGIN_CHART env must be set");
@@ -98,7 +100,7 @@ impl Config {
             .unwrap_or(Value::Bool(false));
     }
 
-    fn parse_values(&mut self) -> () {
+    pub fn parse_values(&mut self) -> () {
         let regex = Regex::new(r"^\$\{(\w+)\}$").unwrap();
         let data: String = env::var("PLUGIN_VALUES").unwrap_or("{}".to_string());
 
@@ -131,6 +133,14 @@ impl Config {
     }
 
     fn write_file(&self) -> () {
+        let rendered_config = self.render_file();
+
+        self.create_file()
+            .write(&rendered_config.into_bytes())
+            .expect("Failed to write config");
+    }
+
+    fn render_file(&self) -> String {
         let mut handlebars = Handlebars::new();
         let mut assigns = BTreeMap::new();
 
@@ -143,12 +153,8 @@ impl Config {
         assigns.insert("skip_tls", &self.skip_tls);
         assigns.insert("token", &self.token);
 
-        let rendered_config = handlebars
+        handlebars
             .render("config", &assigns)
-            .expect("Failed to render kube config");
-
-        self.create_file()
-            .write(&rendered_config.into_bytes())
-            .expect("Failed to write config");
+            .expect("Failed to render kube config")
     }
 }

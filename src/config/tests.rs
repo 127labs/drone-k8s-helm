@@ -12,7 +12,8 @@ pub fn mock_plugin_env_vars() {
 }
 
 pub fn mock_plugin_values_env_vars() {
-    env::set_var("PLUGIN_VALUES", r#"{"dokuwikiEmail":"${DOKUWIKI_EMAIL}","dokuwikiPassword":"${DOKUWIKI_PASSWORD}"}"#);
+    let json = r#"{"dokuwikiEmail":"${DOKUWIKI_EMAIL}","dokuwikiPassword":"${DOKUWIKI_PASSWORD}"}"#;
+    env::set_var("PLUGIN_VALUES", json);
     env::set_var("DOKUWIKI_EMAIL", "john.doe@127labs.com");
     env::set_var("DOKUWIKI_PASSWORD", "saltysea");
 }

@@ -1,4 +1,4 @@
-## Example Deployment
+# Pipeline Examples
 
 ```yaml
 pipeline:
@@ -30,4 +30,32 @@ docker run \
   -e DOKUWIKI_EMAIL=imran@127labs.com \
   -e DOKUWIKI_PASSWORD=password \
   127labs/drone-k8s-helm
+```
+
+Most of the time it's always better to remove all secrets from the .drone.yml manifest.
+
+Here's an example of a production .drone.yml manifest that uses the mounted secrets `plugin_master` and `plugin_token` in place of the config of `master` and `token`
+
+```
+pipeline:
+  staging:
+    image: 127labs/drone-k8s-helm
+    chart: stable/dokuwiki
+    release: wiki-staging
+    skip_tls: true
+    clean_before_release: true
+    values:
+      dokuwikiEmail: $${DOKUWIKI_EMAIL_STAGING}
+      dokuwikiPassword: $${DOKUWIKI_PASSWORD_STAGING}
+    secrets: [dokuwiki_email_staging, dokuwiki_password_staging, plugin_chart, plugin_token]
+  production:
+    image: 127labs/drone-k8s-helm
+    chart: stable/dokuwiki
+    release: wiki
+    skip_tls: true
+    clean_before_release: true
+    values:
+      dokuwikiEmail: $${DOKUWIKI_EMAIL}
+      dokuwikiPassword: $${DOKUWIKI_PASSWORD}
+    secrets: [dokuwiki_email, dokuwiki_password, plugin_chart, plugin_token]
 ```

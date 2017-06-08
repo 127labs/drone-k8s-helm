@@ -1,3 +1,5 @@
+[![Build Status](https://drone.127labs.com/api/badges/127labs/drone-k8s-helm/status.svg)](https://drone.127labs.com/127labs/drone-k8s-helm)
+
 ## Usage
 
 ```yaml

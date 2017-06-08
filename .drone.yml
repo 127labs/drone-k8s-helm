@@ -1,0 +1,17 @@
+pipeline:
+  test:
+    image: scorpil/rust:nightly
+    commands:
+      - cargo test
+      - cargo build --release
+  publish:
+    image: plugins/docker
+    repo: 127labs/drone-k8s-helm
+    tags:
+      - latest
+    secrets:
+      - docker_username
+      - docker_password
+    when:
+      branch: master
+      event: push

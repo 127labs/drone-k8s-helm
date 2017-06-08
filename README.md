@@ -3,7 +3,7 @@
 ```yaml
 pipeline:
   ship:
-    image: 127labs/yakp
+    image: 127labs/drone-k8s-helm
     chart: stable/dokuwiki
     master: https://127.0.0.1:8001
     token: super-long-token
@@ -29,5 +29,5 @@ docker run \
   -e PLUGIN_VALUES='{"dokuwikiEmail":"${DOKUWIKI_EMAIL}","dokuwikiPassword":"${DOKUWIKI_PASSWORD}"}' \
   -e DOKUWIKI_EMAIL=imran@127labs.com \
   -e DOKUWIKI_PASSWORD=password \
-  127labs/yakp
+  127labs/drone-k8s-helm
 ```

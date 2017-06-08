@@ -1,5 +1,5 @@
 [package]
-name = "yakp"
+name = "drone-k8s-helm"
 version = "0.1.0"
 authors = ["Imran Ismail <imran@127labs.com>", "Faris Amali Alis <faris@127labs.com>"]
 

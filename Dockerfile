@@ -16,6 +16,6 @@ RUN tar -zxvf /tmp/${FILENAME} -C /tmp \
   && mv /tmp/kubectl /bin/kubectl \
   && rm -rf /tmp
 
-ADD ./target/x86_64-unknown-linux-musl/release/yakp /bin/yakp
+ADD ./target/x86_64-unknown-linux-musl/release/drone-k8s-helm /bin/drone-k8s-helm
 
-ENTRYPOINT ["/bin/yakp"]
+ENTRYPOINT ["/bin/drone-k8s-helm"]

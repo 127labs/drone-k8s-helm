@@ -47,7 +47,11 @@ pipeline:
     values:
       dokuwikiEmail: $${DOKUWIKI_EMAIL_STAGING}
       dokuwikiPassword: $${DOKUWIKI_PASSWORD_STAGING}
-    secrets: [dokuwiki_email_staging, dokuwiki_password_staging, plugin_chart, plugin_token]
+    secrets:
+      - dokuwiki_email_staging
+      - dokuwiki_password_staging
+      - plugin_master
+      - plugin_token
   production:
     image: 127labs/drone-k8s-helm
     chart: stable/dokuwiki
@@ -57,5 +61,9 @@ pipeline:
     values:
       dokuwikiEmail: $${DOKUWIKI_EMAIL}
       dokuwikiPassword: $${DOKUWIKI_PASSWORD}
-    secrets: [dokuwiki_email, dokuwiki_password, plugin_chart, plugin_token]
+    secrets:
+      - dokuwiki_email
+      - dokuwiki_password
+      - plugin_master
+      - plugin_token
 ```

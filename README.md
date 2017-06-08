@@ -1,4 +1,4 @@
-# Pipeline Examples
+## Usage
 
 ```yaml
 pipeline:
@@ -36,7 +36,7 @@ Most of the time it's always better to remove all secrets from the .drone.yml ma
 
 Here's an example of a production .drone.yml manifest that uses the mounted secrets `plugin_master` and `plugin_token` in place of the config of `master` and `token`
 
-```
+```yaml
 pipeline:
   staging:
     image: 127labs/drone-k8s-helm

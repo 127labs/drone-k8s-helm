@@ -1,4 +1,8 @@
+## drone-k8s-helm
+
 [![Build Status](https://drone.127labs.com/api/badges/127labs/drone-k8s-helm/status.svg)](https://drone.127labs.com/127labs/drone-k8s-helm)
+
+This is a [drone](https://github.com/drone/drone) plugin to deploy with kubernetes helm.
 
 ## Usage
 
@@ -18,7 +22,7 @@ pipeline:
     secrets: [dokuwiki_email, dokuwiki_password]
 ```
 
-Which is equivalent to
+Which is equivalent to:
 
 ```shell
 docker run \

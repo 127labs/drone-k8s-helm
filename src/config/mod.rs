@@ -62,11 +62,11 @@ impl Config {
         Config {
             chart: Value::Null,
             master: Value::Null,
-            namespace: Value::Null,
+            namespace: Value::String("default".to_string()),
             release: Value::Null,
-            skip_tls: Value::Null,
+            skip_tls: Value::Bool(false),
             token: Value::Null,
-            clean_before_release: Value::Null,
+            clean_before_release: Value::Bool(false),
             values: Value::Null,
         }
     }
@@ -80,7 +80,7 @@ impl Config {
             .expect("PLUGIN_MASTER env must be set");
         self.namespace = env::var("PLUGIN_NAMESPACE")
             .and_then(|namespace| Ok(Value::String(namespace)))
-            .unwrap_or(Value::String("default".to_string()));
+            .unwrap_or_default();
         self.release = env::var("PLUGIN_RELEASE")
             .and_then(|release| Ok(Value::String(release)))
             .expect("PLUGIN_RELEASE env must be set");
@@ -88,7 +88,7 @@ impl Config {
             .and_then(|skip_tls| {
                           Ok(Value::Bool(skip_tls.parse().expect("PLUGIN_SKIP_TLS must be bool")))
                       })
-            .unwrap_or(Value::Bool(false));
+            .unwrap_or_default();
         self.token = env::var("PLUGIN_TOKEN")
             .and_then(|token| Ok(Value::String(token)))
             .expect("PLUGIN_TOKEN env must be set");
@@ -98,7 +98,7 @@ impl Config {
                                              .parse()
                                              .expect("PLUGIN_CLEAN_BEFORE_RELEASE must be bool",)))
                       })
-            .unwrap_or(Value::Bool(false));
+            .unwrap_or_default();
     }
 
     pub fn parse_values(&mut self) -> () {

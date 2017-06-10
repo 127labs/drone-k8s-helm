@@ -4,6 +4,7 @@ extern crate serde_json;
 
 mod config;
 mod plugin;
+mod utils;
 
 use config::Config;
 

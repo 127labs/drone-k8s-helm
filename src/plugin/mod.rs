@@ -2,8 +2,6 @@
 mod tests;
 
 use std::process::Command;
-use std::path::PathBuf;
-use std::env;
 
 use utils;
 use config::Config;
@@ -66,7 +64,7 @@ pub fn clean(config: &Config) -> () {
 }
 
 pub fn init() -> () {
-    let helm_bin = which("helm").expect("Helm to be installed");
+    let helm_bin = utils::which("helm").expect("Helm to be installed");
 
     Command::new(helm_bin.to_str().unwrap())
         .arg("init")

@@ -113,9 +113,13 @@ impl Config {
             let value_string = value.as_str().unwrap().to_string();
 
             if regex.is_match(&value_string) {
-                let captures = regex.captures(&value_string).unwrap();
-                let match_str = captures.get(1).unwrap().as_str();
-                let var = env::var(match_str).expect(format!("{} is not set", match_str).as_str());
+                let captured = regex
+                    .captures(&value_string)
+                    .unwrap()
+                    .get(1)
+                    .unwrap()
+                    .as_str();
+                let var = env::var(captured).expect(format!("{} is not set", captured).as_str());
                 *value = Value::String(var.to_string());
             }
         }

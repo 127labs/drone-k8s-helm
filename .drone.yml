@@ -1,9 +1,15 @@
 pipeline:
   test:
-    image: scorpil/rust:nightly
+    image: clux/muslrust
     commands:
       - cargo test
+  build:
+    image: clux/muslrust
+    commands:
       - cargo build --release
+    when:
+      branch: master
+      event: push
   publish:
     image: plugins/docker
     repo: 127labs/drone-k8s-helm

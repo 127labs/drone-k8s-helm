@@ -26,13 +26,13 @@ Which is equivalent to:
 
 ```shell
 docker run \
-  -e PLUGIN_CHART="stable/dokuwiki" \
-  -e PLUGIN_MASTER="https://127.0.0.1:8001" \
-  -e PLUGIN_TOKEN="super-long-token" \
-  -e PLUGIN_RELEASE=wiki \
-  -e PLUGIN_SKIP_TLS=true \
-  -e PLUGIN_CLEAN_BEFORE_RELEASE=true \
-  -e PLUGIN_VALUES='{"dokuwikiEmail":"${DOKUWIKI_EMAIL}","dokuwikiPassword":"${DOKUWIKI_PASSWORD}"}' \
+  -e HELM_CHART="stable/dokuwiki" \
+  -e HELM_MASTER="https://127.0.0.1:8001" \
+  -e HELM_TOKEN="super-long-token" \
+  -e HELM_RELEASE=wiki \
+  -e HELM_SKIP_TLS=true \
+  -e HELM_CLEAN_BEFORE_RELEASE=true \
+  -e HELM_VALUES='{"dokuwikiEmail":"${DOKUWIKI_EMAIL}","dokuwikiPassword":"${DOKUWIKI_PASSWORD}"}' \
   -e DOKUWIKI_EMAIL=imran@127labs.com \
   -e DOKUWIKI_PASSWORD=password \
   127labs/drone-k8s-helm
@@ -56,8 +56,8 @@ pipeline:
     secrets:
       - dokuwiki_email_staging
       - dokuwiki_password_staging
-      - plugin_master
-      - plugin_token
+      - helm_master
+      - helm_token
   production:
     image: 127labs/drone-k8s-helm
     chart: stable/dokuwiki
@@ -70,6 +70,6 @@ pipeline:
     secrets:
       - dokuwiki_email
       - dokuwiki_password
-      - plugin_master
-      - plugin_token
+      - helm_master
+      - helm_token
 ```

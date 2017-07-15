@@ -1,6 +1,6 @@
 FROM alpine:latest
 
-ENV VERSION v2.4.2
+ENV VERSION v2.5.0
 ENV FILENAME helm-${VERSION}-linux-amd64.tar.gz
 ENV KUBECTL v1.6.4
 

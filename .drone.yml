@@ -1,3 +1,4 @@
+branches: [master]
 pipeline:
   test:
     image: clux/muslrust

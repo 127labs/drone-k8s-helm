@@ -115,29 +115,36 @@ impl Config {
     }
 
     pub fn load(&mut self) -> () {
-        self.chart = env::var("HELM_CHART")
+        self.chart = env::var("PLUGIN_CHART")
+            .or(env::var("HELM_CHART"))
             .and_then(|chart| Ok(Value::String(chart)))
             .expect("HELM_CHART env must be set");
-        self.master = env::var("HELM_MASTER")
+        self.master = env::var("PLUGIN_MASTER")
+            .or(env::var("HELM_MASTER"))
             .and_then(|master| Ok(Value::String(master)))
             .expect("HELM_MASTER env must be set");
-        self.namespace = env::var("HELM_NAMESPACE")
+        self.namespace = env::var("PLUGIN_NAMESPACE")
+            .or(env::var("HELM_NAMESPACE"))
             .and_then(|namespace| Ok(Value::String(namespace)))
             .unwrap_or_default();
-        self.release = env::var("HELM_RELEASE")
+        self.release = env::var("PLUGIN_RELEASE")
+            .or(env::var("HELM_RELEASE"))
             .and_then(|release| Ok(Value::String(release)))
             .expect("HELM_RELEASE env must be set");
-        self.skip_tls = env::var("HELM_SKIP_TLS")
+        self.skip_tls = env::var("PLUGIN_SKIP_TLS")
+            .or(env::var("HELM_SKIP_TLS"))
             .and_then(|skip_tls| {
                 Ok(Value::Bool(
                     skip_tls.parse().expect("HELM_SKIP_TLS must be bool"),
                 ))
             })
             .unwrap_or_default();
-        self.token = env::var("HELM_TOKEN")
+        self.token = env::var("PLUGIN_TOKEN")
+            .or(env::var("HELM_TOKEN"))
             .and_then(|token| Ok(Value::String(token)))
             .expect("HELM_TOKEN env must be set");
-        self.clean_before_release = env::var("HELM_CLEAN_BEFORE_RELEASE")
+        self.clean_before_release = env::var("PLUGIN_CLEAN_BEFORE_RELEASE")
+            .or(env::var("HELM_CLEAN_BEFORE_RELEASE"))
             .and_then(|clean_before_release| {
                 Ok(Value::Bool(clean_before_release.parse().expect(
                     "HELM_CLEAN_BEFORE_RELEASE must be bool",
@@ -148,7 +155,9 @@ impl Config {
 
     pub fn parse_values(&mut self) -> () {
         let regex = Regex::new(r"^\{\{(\w+)\}\}$").unwrap();
-        let data: String = env::var("HELM_VALUES").unwrap_or("{}".to_string());
+        let data: String = env::var("PLUGIN_VALUES")
+            .or(env::var("HELM_VALUES"))
+            .unwrap_or("{}".to_string());
 
         self.values = serde_json::from_str::<Value>(&data).expect("Failed to parse values");
 

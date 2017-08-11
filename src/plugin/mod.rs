@@ -12,20 +12,18 @@ pub trait Plugin {
 }
 
 pub fn upgrade(config: &Config) -> () {
-    config
-        .build_upgrade_command()
-        .status()
-        .expect("Failed to execute helm upgrade command");
+    config.build_upgrade_command().status().expect(
+        "Failed to execute helm upgrade command",
+    );
 }
 
 pub fn clean(config: &Config) -> () {
     let clean_before_release = config.clean_before_release.as_bool().unwrap();
 
     if clean_before_release == true {
-        config
-            .build_clean_command()
-            .status()
-            .expect("Failed to delete jobs from master");
+        config.build_clean_command().status().expect(
+            "Failed to delete jobs from master",
+        );
     }
 }
 
